@@ -46,4 +46,4 @@ def y(sz, level):
            
           
 # tree of size 80 and level 7
-y(80, 5)
+y(80, 15)
