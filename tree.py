@@ -1,3 +1,4 @@
+from rw import rw 
 class Tree:
     def __init__(self): 
         pass
