@@ -176,6 +176,7 @@ class FractalTree(object):
             ##flush the buffer messages down a level
             print("Buffer full, Flushing")
             self.flush(self.root)
+            self.root.messages.append(("insert", key, value))
 
 
             
@@ -210,7 +211,10 @@ class FractalTree(object):
 
         #check if the node is leaf_node: if yes then apply messages
         if (node.leaf == True):
+
             self.apply_msg(node)
+            #all msgs flushed. Now clear the node's buffer messages: 
+            node.messages = [] 
             return 
 
         ## else traverse the messages in buffer and flush them down
@@ -325,11 +329,12 @@ class FractalTree(object):
 #     print('\n')
 #     demo_bplustree()
     
-mytree = BPlusTree(4)
+mytree = FractalTree(4)
 mytree.print_children()
 mytree.insert(2, "panda")
 mytree.insert(3, "panda")
 mytree.insert(4, "panda")
 mytree.insert(5, "panda")
 mytree.insert(6, "panda")
+print(mytree.root.messages)
     
