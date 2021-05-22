@@ -104,7 +104,7 @@ class FractalTree(object):
 
         """Splits the node into two and stores them as child nodes."""
 
-        center_node_index = node.order//2
+        center_node_index = node.order//2 
         center_key, center_value = node.keys[center_node_index], node.values[center_node_index]
 
         left = Node(node.order)
@@ -124,11 +124,11 @@ class FractalTree(object):
         #if the node is leaf node, then copy center_node_index to the right_node as well: 
         if(node.leaf): 
             ## add the center key value pair as well into the left and right child along with the right half of it. 
-            right.keys, right.values = node.keys[center_node_index+1:], node.values[center_node_index+1:]
+            right.keys, right.values = node.keys[center_node_index:], node.values[center_node_index:]
             left.keys, left.values = node.keys[:center_node_index], node.values[:center_node_index]
         
         else:
-            right.keys, right.values = node.keys[center_node_index:]
+            right.keys, right.values = node.keys[center_node_index+1:]
             left.keys, left.values = node.keys[:center_node_index]
 
         
