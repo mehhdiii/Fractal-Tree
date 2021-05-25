@@ -18,7 +18,7 @@ class Node(object):
         self.parent = None
         self.leaf = True
         self.buffer=[]
-        self.BUFFER_SIZE = 1
+        self.BUFFER_SIZE = order//2
         self.dict={}
 
 
@@ -212,7 +212,7 @@ class BPlusTree(object):
             return 
         
         else:
-            #if output is not None, it means the buffer is full. 
+            #if output is not None, it means the buffer is full and root is not leaf. 
             if output!=None: 
                 self.flush(self.root)
     
@@ -233,11 +233,11 @@ class BPlusTree(object):
         
 
         #check if the node is leaf_node: if yes then apply messages
-        if (node.leaf == True):
-            self.apply_msg(node)
-            #all msgs flushed. Now clear the node's buffer messages: 
-            node.buffer= [] 
-            return 
+        # if (node.leaf == True):
+        #     self.apply_msg(node)
+        #     #all msgs flushed. Now clear the node's buffer messages: 
+        #     node.buffer= [] 
+        #     return 
 
         ## else traverse the messages in buffer and flush them down
         for msg in node.buffer:
@@ -250,16 +250,20 @@ class BPlusTree(object):
             #copy message to childs buffer
             child.add_to_buffer(msg)
 
-            # check if childs buffer is full 
-            if len(child.buffer)>=child.BUFFER_SIZE:
+            #check if the child is leaf, if yes then apply the message: 
+            if(child.leaf):
+                self.apply_msg(child)
+
+
+            # If child is not a child, then check if childs buffer is full 
+            elif len(child.buffer)>=child.BUFFER_SIZE:
                 #flush and then add the message
                 self.flush(child)
             
                 
-            else:
-                #add the message to this child
-                if msg not in child.buffer:
-                    child.add_to_buffer(msg)
+            # else: # if not leaf and buffer also not full, then just write the message to child
+            #     if msg not in child.buffer:
+            #         child.add_to_buffer(msg)
 
         #all msgs flushed. Now clear the node's buffer messages: 
         node.buffer = [] 
@@ -286,28 +290,36 @@ class BPlusTree(object):
 
 import random
 
-bplustree = BPlusTree(order=4)
-for i in range(1000):
-    x = random.randint(1, 1000)
-    bplustree.buffer((x, str(i)))
-# bplustree.buffer((1,"1"))
-# bplustree.buffer((4, "4"))
-# bplustree.buffer((7, "7"))
-# bplustree.buffer((10,"10"))
-# bplustree.buffer((17,"17"))
-# bplustree.buffer((21,"21"))
-# bplustree.buffer((31,"name"))
-# bplustree.buffer((25,"25"))
-# bplustree.buffer((19,"19"))
-# bplustree.buffer((20,"20"))
-# bplustree.buffer((28,"28"))
-# bplustree.buffer((42,"42"))
-# bplustree.buffer((15,"15"))
-# bplustree.buffer((41,"41"))
+bplustree = BPlusTree(order=8)
+# for i in range(1000000):
+#     x = random.randint(1, 1000)
+#     bplustree.buffer((x, str(i)))
 
-# bplustree.buffer((5,"5"))
-# bplustree.buffer((3,"3"))
-# bplustree.buffer((2,"2"))
+bplustree.buffer((1,"1"))
+bplustree.buffer((4, "4"))
+bplustree.buffer((7, "7"))
+bplustree.buffer((10,"10"))
+bplustree.buffer((17,"17"))
+bplustree.buffer((21,"21"))
+bplustree.buffer((31,"name"))
+bplustree.buffer((25,"25"))
+bplustree.buffer((19,"19"))
+bplustree.buffer((20,"20"))
+bplustree.buffer((28,"28"))
+bplustree.buffer((42,"42"))
+bplustree.buffer((15,"15"))
+bplustree.buffer((41,"41"))
+
+bplustree.buffer((5,"5"))
+bplustree.buffer((3,"3"))
+bplustree.buffer((2,"2"))
+
+bplustree.buffer((100,"5"))
+bplustree.buffer((-2,"3"))
+bplustree.buffer((-200,"2"))
+bplustree.buffer((-100,"5"))
+bplustree.buffer((-97,"3"))
+bplustree.buffer((-96,"2"))
 bplustree.show()
 # bplustree.calling_ra()
 # bplustree.all_buffer_flush(bplustree.root)
