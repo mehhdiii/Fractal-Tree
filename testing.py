@@ -54,6 +54,7 @@ class Node(object):
             elif i + 1 == len(self.keys):
                 self.keys.append(key)
                 self.values.append([value])
+                break
 
     def split(self):
         """Splits the node into two and stores them as child nodes."""
