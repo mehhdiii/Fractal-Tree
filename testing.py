@@ -2,6 +2,9 @@
 data order and (2) allows insertions and access in logarithmic time.
 """
 
+import math
+
+
 class Node(object):
     """Base node object.
     Each node stores keys and values. Keys are not unique to each value, and as such values are
@@ -15,11 +18,16 @@ class Node(object):
         self.order = order
         self.keys = []
         self.values = []
+
         self.parent = None
         self.leaf = True
         self.buffer=[]
         self.BUFFER_SIZE = order//2
         self.dict={}
+
+
+        #check if the node is leaf_node: if yes then apply messages
+        if (node.leaf == True):
 
 
     def add_to_buffer(self,message):
@@ -239,11 +247,13 @@ class BPlusTree(object):
         #     node.buffer= [] 
         #     return 
 
+
         ## else traverse the messages in buffer and flush them down
         for msg in node.buffer:
 
             #else check which child the message should traverse down to
             key, value = msg[0], msg[1]
+
 
             child,indx = self._find(node,key)
             
@@ -287,6 +297,171 @@ class BPlusTree(object):
         
         #now clear the buffer: 
         node.buffer = []
+
+
+
+
+
+    def search(self, key):
+        current_node = self.root
+        while(current_node.check_leaf == False):
+            temp2 = current_node.keys
+            for i in range(len(temp2)):
+                if (key == temp2[i]):
+                    current_node = current_node.keys[i + 1]
+                    break
+                elif (key < temp2[i]):
+                    current_node = current_node.keys[i]
+                    break
+                elif (i + 1 == len(current_node.keys)):
+                    current_node = current_node.keys[i + 1]
+                    break
+        return current_node
+
+    # Delete a node
+    def delete(self, key, value):
+        node_ = self.search(key)
+
+        temp = 0
+        for i, item in enumerate(node_.values):
+            if item == value:
+                temp = 1
+                if node_ == self.root:
+                    node_.values.pop(i)
+                    node_.keys.pop(i)
+                else:
+                    node_.keys[i].pop(node_.keys[i].index(key))
+                    del node_.keys[i]
+                    node_.values.pop(node_.values.index(value))
+                    self.deleteEntry(node_, value, key)
+        if temp == 0:
+            print("Value not in Tree")
+            return
+
+    # Delete an entry
+    def deleteEntry(self, node_, value, key):
+        if not node_.leaf:
+            for i, item in enumerate(node_.keys):
+                if item == key:
+                    node_.keys.pop(i)
+                    break
+            for i, item in enumerate(node_.values):
+                if item == value:
+                    node_.values.pop(i)
+                    break
+
+        if self.root == node_ and len(node_.keys) == 1:
+            self.root = node_.keys[0]
+            node_.keys[0].parent = None
+            del node_
+            return
+        elif (len(node_.keys) < int(math.ceil(node_.order / 2)) and node_.leaf == False) or (len(node_.values) < int(math.ceil((node_.order - 1) / 2)) and node_.leaf == True):
+
+            is_predecessor = 0
+            parentNode = node_.parent
+            PrevNode = -1
+            NextNode = -1
+            PrevK = -1
+            PostK = -1
+            for i, item in enumerate(parentNode.keys):
+
+                if item == node_:
+                    if i > 0:
+                        PrevNode = parentNode.keys[i - 1]
+                        PrevK = parentNode.values[i - 1]
+
+                    if i < len(parentNode.keys) - 1:
+                        NextNode = parentNode.keys[i + 1]
+                        PostK = parentNode.values[i]
+
+            if PrevNode == -1:
+                ndash = NextNode
+                value_ = PostK
+            elif NextNode == -1:
+                is_predecessor = 1
+                ndash = PrevNode
+                value_ = PrevK
+            else:
+                if len(node_.values) + len(NextNode.values) < node_.order:
+                    ndash = NextNode
+                    value_ = PostK
+                else:
+                    is_predecessor = 1
+                    ndash = PrevNode
+                    value_ = PrevK
+
+            if len(node_.values) + len(ndash.values) < node_.order:
+                if is_predecessor == 0:
+                    node_, ndash = ndash, node_
+                ndash.keys += node_.keys
+                if not node_.leaf:
+                    ndash.values.append(value_)
+                else:
+                    ndash.nextKey = node_.nextKey
+                ndash.values += node_.values
+
+                if not ndash.leaf:
+                    for j in ndash.keys:
+                        j.parent = ndash
+
+                self.deleteEntry(node_.parent, value_, node_)
+                del node_
+            else:
+                if is_predecessor == 1:
+                    if not node_.leaf:
+                        ndashpm = ndash.keys.pop(-1)
+                        ndashkm_1 = ndash.values.pop(-1)
+                        node_.keys = [ndashpm] + node_.keys
+                        node_.values = [value_] + node_.values
+                        parentNode = node_.parent
+                        for i, item in enumerate(parentNode.values):
+                            if item == value_:
+                                p.values[i] = ndashkm_1
+                                break
+                    else:
+                        ndashpm = ndash.keys.pop(-1)
+                        ndashkm = ndash.values.pop(-1)
+                        node_.keys = [ndashpm] + node_.keys
+                        node_.values = [ndashkm] + node_.values
+                        parentNode = node_.parent
+                        for i, item in enumerate(p.values):
+                            if item == value_:
+                                parentNode.values[i] = ndashkm
+                                break
+                else:
+                    if not node_.leaf:
+                        ndashp0 = ndash.keys.pop(0)
+                        ndashk0 = ndash.values.pop(0)
+                        node_.keys = node_.keys + [ndashp0]
+                        node_.values = node_.values + [value_]
+                        parentNode = node_.parent
+                        for i, item in enumerate(parentNode.values):
+                            if item == value_:
+                                parentNode.values[i] = ndashk0
+                                break
+                    else:
+                        ndashp0 = ndash.keys.pop(0)
+                        ndashk0 = ndash.values.pop(0)
+                        node_.keys = node_.keys + [ndashp0]
+                        node_.values = node_.values + [ndashk0]
+                        parentNode = node_.parent
+                        for i, item in enumerate(parentNode.values):
+                            if item == value_:
+                                parentNode.values[i] = ndash.values[0]
+                                break
+
+                if not ndash.leaf:
+                    for j in ndash.keys:
+                        j.parent = ndash
+                if not node_.leaf:
+                    for j in node_.keys:
+                        j.parent = node_
+                if not parentNode.leaf:
+                    for j in parentNode.keys:
+                        j.parent = parentNode
+        
+
+
 
 import random
 
