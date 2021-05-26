@@ -26,8 +26,8 @@ class Node(object):
         self.dict={}
 
 
-        #check if the node is leaf_node: if yes then apply messages
-        if (node.leaf == True):
+        # #check if the node is leaf_node: if yes then apply messages
+        # if (node.leaf == True):
 
 
     def add_to_buffer(self,message):
