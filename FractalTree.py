@@ -100,7 +100,7 @@ class Node(object):
     def val(self):
         if self.leaf:
             for ind,i in enumerate(self.keys):
-                self.dict[i]=self.keys[ind]
+                self.dict[i]=self.values[ind]
                 # return [self.keys,self.values]
             return self.dict
         else:
@@ -275,17 +275,15 @@ class FractalTree(object):
     def apply_msg(self, node):
         """Applies the insert/delete message on the -> node"""
         for msg in node.buffer:
-
-            command = "insert" #hardcoding command for now
-            
-            if command =="insert":
-                key, value = msg[0], msg[1]
+            key, value,command = msg
+            if command.lower() == "insert":
+                key, value = int(msg[0]), msg[1]
                 ## insertion code goes here
                 self.insert(node.parent,node, key, value)
-        
+            if command.lower()== "delete":
+                self.delete(key,value)
         #now clear the buffer: 
         node.buffer = []
-
 
 
 
