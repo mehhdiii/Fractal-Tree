@@ -1,7 +1,9 @@
-"""Simple implementation of a B+ tree, a self-balancing tree data structure that (1) maintains sort
+"""Simple implementation of a Fractal tree Index, a self-balancing tree data structure that (1) maintains sort
 data order and (2) allows insertions and access in logarithmic time.
 """
+
 import math
+
 
 class Node(object):
     """Base node object.
@@ -16,20 +18,34 @@ class Node(object):
         self.order = order
         self.keys = []
         self.values = []
+
+        self.parent = None
         self.leaf = True
         self.buffer=[]
+        self.BUFFER_SIZE = order//2
         self.dict={}
-    def add_buffer(self,message):
-        if len(self.buffer)==self.order:
-            # print("overflow")
+
+
+        # #check if the node is leaf_node: if yes then apply messages
+        # if (node.leaf == True):
+
+
+    def add_to_buffer(self,message):
+        """adds an insert/delete message to the self node's buffer. 
+        
+        Return values: 
+        If: the buffer is full, return None 
+        else: returns the message itself
+        """ 
+
+        if len(self.buffer)==self.BUFFER_SIZE: # If buffer is full, return the message as an indication 
+            self.buffer.append(message)    
+            return message 
+        
+        else: #if buffer is not full, return None. 
             self.buffer.append(message)
-            
-            return message
-        else:
-            # print("adding to buffer")
-            self.buffer.append(message)
-            # print(self.buffer)
             return None
+
     def add(self, key, value):
         """Adds a key-value pair to the node."""
         # If the node is empty, simply insert the key-value pair.
@@ -55,6 +71,7 @@ class Node(object):
             elif i + 1 == len(self.keys):
                 self.keys.append(key)
                 self.values.append([value])
+                break
 
     def split(self):
         """Splits the node into two and stores them as child nodes."""
@@ -62,9 +79,11 @@ class Node(object):
         right = Node(self.order)
         mid = self.order // 2
 
+        left.parent = self
         left.keys = self.keys[:mid]
         left.values = self.values[:mid]
 
+        right.parent = self
         right.keys = self.keys[mid:]
         right.values = self.values[mid:]
 
@@ -100,7 +119,7 @@ class Node(object):
                
     
 
-class BPlusTree(object):
+class FractalTree(object):
     """B+ tree object, consisting of nodes.
     Nodes will automatically be split into two once it is full. When a split occurs, a key will
     'float' upwards and be inserted into the parent node to act as a pivot.
@@ -110,9 +129,11 @@ class BPlusTree(object):
     def __init__(self, order=8):
         self.root = Node(order)
         self.dict={}
+
+    
     def _find(self, node, key):
         """ For a given node and key, returns the index where the key should be inserted and the
-        list of values at that index."""
+        child/value at that index."""
         for i, item in enumerate(node.keys):
             if key < item:
                 return node.values[i], i
@@ -137,28 +158,32 @@ class BPlusTree(object):
                 parent.values += child.values
                 break
 
-    def insert(self, key, value):
-        """Inserts a key-value pair after traversing to a leaf node. If the leaf node is full, split
+    def insert(self, parent_node: Node, leaf_node: Node, key, value):
+        """Inserts a key-value pair to a leaf node. If the leaf node is full, split
         the leaf node into two.
+        This method can be called from within the class's apply_message() method
         """
-        parent = None
-        child = self.root
 
-        # Traverse tree until leaf node is reached.
-        while not child.leaf:
-            parent = child
-            child, index = self._find(child, key)
+        #Inputs: 
+        #parent_node: parent of the leaf node
+        #leaf_node: The leaf node on which to insert key, value
+        #key: The key of the data
+        #value: Data value corresponding to the key
 
-        child.add(key, value)
+        
+        leaf_node.add(key, value)
 
         # If the leaf node is full, split the leaf node into two.
-        if child.is_full():
-            child.split()
+        if leaf_node.is_full():
+            leaf_node.split()
 
             # Once a leaf node is split, it consists of a internal node and two leaf nodes. These
             # need to be re-inserted back into the tree.
-            if parent and not parent.is_full():
-                self._merge(parent, child, index)
+            if parent_node and not parent_node.is_full():
+                #find out the index at which leaf_node is stored in parent 
+                child, index = self._find(leaf_node, key)
+                #merge the parent and leaf node 
+                self._merge(parent_node, leaf_node, index)
     
         
     def retrieve(self, key):
@@ -176,93 +201,141 @@ class BPlusTree(object):
 
     def calling_ra(self):
       return(self.root.val())
+
+    
     def show(self):
         """Prints the keys at each level."""
         self.root.show()
 
+
     def buffer(self,message):
-        output=self.root.add_buffer(message)
-        if output!=None:
-            self.flush(self.root)
-    
-    def all_buffer_flush(self,node):
-        if node.leaf==False:
-            self.flush(node)
-            for i in node.keys:
-                child=node
-                child,ind=self._find(child,i)
-                self.all_buffer_flush(child)
+        """Buffers an incoming message of insert/delete to Tree.""" 
+        
+        # add the message to the root node
+        output = self.root.add_to_buffer(message)
+
+        #if the root node is a leaf node, directly apply the message: 
+        if (self.root.leaf):
+            self.apply_msg(self.root)
+            return 
+        
         else:
-            return
-            #still working on it
+            #if output is not None, it means the buffer is full and root is not leaf. 
+            if output!=None: 
+                self.flush(self.root)
+    
+
     def flush(self, node: Node):
-        ## flush msgs from node down a level:
+        """flushes msgs in the node's buffer down a level"""
         
 
         #check if the node is leaf_node: if yes then apply messages
-        if (node.leaf == True):
+        # if (node.leaf == True):
+        #     self.apply_msg(node)
+        #     #all msgs flushed. Now clear the node's buffer messages: 
+        #     node.buffer= [] 
+        #     return 
 
-            self.apply_msg(node)
-            #all msgs flushed. Now clear the node's buffer messages: 
-            node.buffer= [] 
-            return 
 
         ## else traverse the messages in buffer and flush them down
         for msg in node.buffer:
 
             #else check which child the message should traverse down to
             key, value = msg[0], msg[1]
-            child=node
-            child,indx = self._find(child,key)
-            # print ("going to "+str(child.keys))
-            if len(child.buffer)==node.order:
+
+
+            child,indx = self._find(node,key)
+            
+            #copy message to childs buffer
+            child.add_to_buffer(msg)
+
+            #check if the child is leaf, if yes then apply the message: 
+            if(child.leaf):
+                self.apply_msg(child)
+
+
+            # If child is not a child, then check if childs buffer is full 
+            elif len(child.buffer)>=child.BUFFER_SIZE:
+                #flush and then add the message
                 self.flush(child)
-            #check if this childs buffer is full: 
-            # if (len(node.children[loc].messages) == len(node.children[loc].buffer)):
-                #if full, then flush this child first: (recursively)
-                
-            else:
-                #add the message to this child
-                if msg not in child.buffer:
-                    child.add_buffer(msg)
+            
+            # else: # if not leaf and buffer also not full, then just write the message to child
+            #     if msg not in child.buffer:
+            #         child.add_to_buffer(msg)
 
         #all msgs flushed. Now clear the node's buffer messages: 
-        node.messages = [] 
-    ''' how are messages being added/ what format/ lower case?'''
+        node.buffer = [] 
+
+
+            
+
+                
+                
+
+    def apply_msg(self, node):
+        """Applies the insert/delete message on the -> node"""
+        for msg in node.buffer:
+
+            command = "insert" #hardcoding command for now
+            
+            if command =="insert":
+                key, value = msg[0], msg[1]
+                ## insertion code goes here
+                self.insert(node.parent,node, key, value)
+        
+        #now clear the buffer: 
+        node.buffer = []
+
+
+
+
 
     def search(self, key):
+        """
+        Searches for a key value in the tree
+
+        Return value: 
+        leaf node object that contains the key"""
+
+        #store the root node
         current_node = self.root
-        while(current_node.check_leaf == False):
+        #recursively traverse until a leaf is reached
+        while(current_node.leaf == False):
+            #traverse on the keys of the non-leaf node to find next child
             temp2 = current_node.keys
             for i in range(len(temp2)):
                 if (key == temp2[i]):
-                    current_node = current_node.keys[i + 1]
+                    #if the key is found, traverse to its right child 
+                    current_node = current_node.values[i + 1]
                     break
                 elif (key < temp2[i]):
-                    current_node = current_node.keys[i]
+                    #if key is less than the node.key, goto left child 
+                    current_node = current_node.values[i]
                     break
                 elif (i + 1 == len(current_node.keys)):
+                    #if key is not found and end of node reached, goto right child 
                     current_node = current_node.keys[i + 1]
                     break
         return current_node
 
     # Delete a node
     def delete(self, key, value):
+        
+        # search and find the leaf node where the value may exists
         node_ = self.search(key)
 
-        temp = 0
+        exists = 0 #flag to indicate whether the value exists.  
         for i, item in enumerate(node_.values):
             if item == value:
-                temp = 1
+                exists = 1
                 if node_ == self.root:
                     node_.values.pop(i)
                     node_.keys.pop(i)
                 else:
-                    node_.keys[i].pop(node_.keys[i].index(key))
-                    del node_.keys[i]
-                    node_.values.pop(node_.values.index(value))
+                    node_.keys.pop(i)
+                    node_.values.pop(i)
                     self.deleteEntry(node_, value, key)
-        if temp == 0:
+        if not exists:
             print("Value not in Tree")
             return
 
@@ -388,38 +461,7 @@ class BPlusTree(object):
                     for j in parentNode.keys:
                         j.parent = parentNode
         
-    def apply_msg(self, node):
-        for msg in node.buffer:
-            command = msg[0].lower() #making it lower case for comparison
-            key, value = msg[1], msg[2]
-            if command =="insert":
-                ## insertion code goes here
-                self.add(node, key, value)
-            # elif command == "delete":
-                # deleteEntry(node,value,key)
 
 
-bplustree = BPlusTree(order=4)
-bplustree.insert(1,"1")
-bplustree.insert(4, "4")
-bplustree.insert(7, "7")
-bplustree.insert(10,"10")
-bplustree.insert (17,"17")
-bplustree.insert(21,"21")
-bplustree.insert(31,"name")
-bplustree.insert(25,"25")
-bplustree.insert(19,"19")
-bplustree.insert(20,"20")
-bplustree.insert(28,"28")
-bplustree.insert(42,"42")
-bplustree.insert(42,"42")
-bplustree.delete(42,"42")
-# bplustree.buffer((15,"15"))
-# bplustree.buffer((41,"41"))
 
-# bplustree.buffer((5,"5"))
-# bplustree.buffer((3,"3"))
-# bplustree.buffer((2,"2"))
-bplustree.show()
-# bplustree.calling_ra()
-bplustree.all_buffer_flush(bplustree.root)
+
