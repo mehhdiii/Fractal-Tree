@@ -291,8 +291,13 @@ class BPlusTree(object):
 
 
     def search(self, key):
+        """Search for a key value in theh node"""
+
+        #store the root node
         current_node = self.root
-        while(current_node.check_leaf == False):
+        #recursively traverse until a leaf is reached
+        while(current_node.leaf == False):
+            #traverse on the keys of the non-leaf node to find next child
             temp2 = current_node.keys
             for i in range(len(temp2)):
                 if (key == temp2[i]):
@@ -308,6 +313,7 @@ class BPlusTree(object):
 
     # Delete a node
     def delete(self, key, value):
+        
         node_ = self.search(key)
 
         temp = 0
