@@ -98,10 +98,10 @@ class Node(object):
         return len(self.keys) == self.order
 
     def val(self):
-        if self.leaf:
+        # it is a recursive function to retrieve all keys and values in the Fractal Tree
+        if self.leaf:# values are stored in leaf so they will append values when they reach leaf
             for ind,i in enumerate(self.keys):
                 self.dict[i]=self.values[ind]
-                # return [self.keys,self.values]
             return self.dict
         else:
             for item in self.values:
@@ -199,7 +199,7 @@ class FractalTree(object):
         return None
 
     def calling_ra(self):
-      return(self.root.val())
+      return(self.root.val()) # calls the recursive function to get a dictionary of all keys and values in the fractal tree
 
     
     def show(self):
