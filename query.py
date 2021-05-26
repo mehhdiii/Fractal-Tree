@@ -58,7 +58,9 @@ class Query():
         print("Displaying Tree: ")
         for k,v in dict.items():
             keys.append(k)
-            values.append(v[0])
+            for i in v:
+                    if type(i)!=str:
+                        values.append(i)
         print(keys,values)
         print()
         set={}
@@ -74,9 +76,7 @@ class Query():
         print(df)
         return
 
-q=Query(FT.FractalTree())
-q.user_input()
-q.show()
+
 
 # def apply_msg(self, node):
 #         """Applies the insert/delete message on the -> node"""
