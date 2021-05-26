@@ -280,7 +280,8 @@ class FractalTree(object):
 
 
         ## else traverse the messages in buffer and flush them down
-        for msg in node.buffer:
+        while node.buffer!=[]:
+            msg = node.buffer.pop(0)
 
             #else check which child the message should traverse down to
             key, value = msg[0], msg[1]
@@ -305,8 +306,7 @@ class FractalTree(object):
             #     if msg not in child.buffer:
             #         child.add_to_buffer(msg)
 
-        #all msgs flushed. Now clear the node's buffer messages: 
-        node.buffer = [] 
+        
 
 
             
