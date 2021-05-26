@@ -84,8 +84,13 @@ class Node(object):
         left.values = self.values[:mid] 
 
         right.parent = self 
-        right.keys = self.keys[mid:] 
-        right.values = self.values[mid:] 
+        if self.leaf:          
+            right.keys = self.keys[mid:] 
+            right.values = self.values[mid:] 
+        else:
+            right.keys = self.keys[mid+1:] 
+            right.values = self.values[mid+1:] 
+
 
         # When the node is split, set the parent key to the left-most key of the right child node.
         self.keys = [right.keys[0]]
@@ -271,19 +276,11 @@ class FractalTree(object):
         """flushes msgs in the node's buffer down a level"""
         
 
-        #check if the node is leaf_node: if yes then apply messages
-        # if (node.leaf == True):
-        #     self.apply_msg(node)
-        #     #all msgs flushed. Now clear the node's buffer messages: 
-        #     node.buffer= [] 
-        #     return 
-
-
-        ## else traverse the messages in buffer and flush them down
+        ##traverse the messages in buffer and flush them down
         while node.buffer!=[]:
             msg = node.buffer.pop(0)
 
-            #else check which child the message should traverse down to
+            
             key, value = msg[0], msg[1]
 
 
@@ -297,14 +294,11 @@ class FractalTree(object):
                 self.apply_msg(child)
 
 
-            # If child is not a child, then check if childs buffer is full 
+            # If child is not a leaf, then check if childs buffer is full 
             elif len(child.buffer)>=child.BUFFER_SIZE:
                 #flush and then add the message
                 self.flush(child)
             
-            # else: # if not leaf and buffer also not full, then just write the message to child
-            #     if msg not in child.buffer:
-            #         child.add_to_buffer(msg)
 
         
 
