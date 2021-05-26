@@ -119,7 +119,7 @@ class Node(object):
                
     
 
-class BPlusTree(object):
+class FractalTree(object):
     """B+ tree object, consisting of nodes.
     Nodes will automatically be split into two once it is full. When a split occurs, a key will
     'float' upwards and be inserted into the parent node to act as a pivot.
@@ -133,7 +133,7 @@ class BPlusTree(object):
     
     def _find(self, node, key):
         """ For a given node and key, returns the index where the key should be inserted and the
-        list of values at that index."""
+        child/value at that index."""
         for i, item in enumerate(node.keys):
             if key < item:
                 return node.values[i], i
@@ -291,8 +291,11 @@ class BPlusTree(object):
 
 
     def search(self, key):
-        """Helper function for delete.
-        Searches for a key value in the tree"""
+        """
+        Searches for a key value in the tree
+
+        Return value: 
+        leaf node object that contains the key"""
 
         #store the root node
         current_node = self.root
@@ -318,21 +321,21 @@ class BPlusTree(object):
     # Delete a node
     def delete(self, key, value):
         
+        # search and find the leaf node where the value may exists
         node_ = self.search(key)
 
-        temp = 0
+        exists = 0 #flag to indicate whether the value exists.  
         for i, item in enumerate(node_.values):
             if item == value:
-                temp = 1
+                exists = 1
                 if node_ == self.root:
                     node_.values.pop(i)
                     node_.keys.pop(i)
                 else:
-                    node_.keys[i].pop(node_.keys[i].index(key))
-                    del node_.keys[i]
-                    node_.values.pop(node_.values.index(value))
+                    node_.keys.pop(i)
+                    node_.values.pop(i)
                     self.deleteEntry(node_, value, key)
-        if temp == 0:
+        if not exists:
             print("Value not in Tree")
             return
 
@@ -463,7 +466,7 @@ class BPlusTree(object):
 
 import random
 
-bplustree = BPlusTree(order=8)
+bplustree = FractalTree(order=8)
 # for i in range(1000000):
 #     x = random.randint(1, 1000)
 #     bplustree.buffer((x, str(i)))
