@@ -291,7 +291,8 @@ class BPlusTree(object):
 
 
     def search(self, key):
-        """Search for a key value in theh node"""
+        """Helper function for delete.
+        Searches for a key value in the tree"""
 
         #store the root node
         current_node = self.root
@@ -301,12 +302,15 @@ class BPlusTree(object):
             temp2 = current_node.keys
             for i in range(len(temp2)):
                 if (key == temp2[i]):
-                    current_node = current_node.keys[i + 1]
+                    #if the key is found, traverse to its right child 
+                    current_node = current_node.values[i + 1]
                     break
                 elif (key < temp2[i]):
-                    current_node = current_node.keys[i]
+                    #if key is less than the node.key, goto left child 
+                    current_node = current_node.values[i]
                     break
                 elif (i + 1 == len(current_node.keys)):
+                    #if key is not found and end of node reached, goto right child 
                     current_node = current_node.keys[i + 1]
                     break
         return current_node
