@@ -161,14 +161,14 @@ class BPlusTree(object):
     def insert(self, parent_node: Node, leaf_node: Node, key, value):
         """Inserts a key-value pair to a leaf node. If the leaf node is full, split
         the leaf node into two.
+        This method can be called from within the class's apply_message() method
         """
-        # parent = None
-        # child = self.root
 
-        # # Traverse tree until leaf node is reached.
-        # while not child.leaf:
-        #     parent = child
-       
+        #Inputs: 
+        #parent_node: parent of the leaf node
+        #leaf_node: The leaf node on which to insert key, value
+        #key: The key of the data
+        #value: Data value corresponding to the key
 
         
         leaf_node.add(key, value)
@@ -224,20 +224,9 @@ class BPlusTree(object):
             if output!=None: 
                 self.flush(self.root)
     
-    # def all_buffer_flush(self,node):
-    #     if node.leaf==False:
-    #         self.flush(node)
-    #         for i in node.keys:
-    #             child=node
-    #             child,ind=self._find(child,i)
-    #             self.all_buffer_flush(child)
-    #     else:
-    #         return
-    #         #still working on it
 
-    
     def flush(self, node: Node):
-        ## flush msgs from node down a level:
+        """flushes msgs in the node's buffer down a level"""
         
 
         #check if the node is leaf_node: if yes then apply messages
@@ -270,7 +259,6 @@ class BPlusTree(object):
                 #flush and then add the message
                 self.flush(child)
             
-                
             # else: # if not leaf and buffer also not full, then just write the message to child
             #     if msg not in child.buffer:
             #         child.add_to_buffer(msg)
