@@ -315,24 +315,13 @@ class FractalTree(object):
     def apply_msg(self, node):
         """Applies the insert/delete message on the -> node"""
         for msg in node.buffer:
-# <<<<<<< HEAD
 
-            # command = "insert" #hardcoding command for now
-            
-            # if command =="insert":
-            key, value, command = msg[0], msg[1], msg[2] 
-            ## insertion code goes here
-            self.insert(node.parent,node, key, value)
-        
-# =======
-#             key, value,command = msg
-#             if command.lower() == "insert":
-#                 key, value = int(msg[0]), msg[1]
-#                 ## insertion code goes here
-#                 self.insert(node.parent,node, key, value)
-#             if command.lower()== "delete":
-#                 self.delete(key,value)
-# >>>>>>> a1cd25b2a2a56879a8b7e2920f258dea3a148187
+            key, value,command = msg
+            if command.lower() == "insert":
+                key, value = int(msg[0]), msg[1]
+                self.insert(node.parent,node, key, value)
+            if command.lower()== "delete":
+                self.delete(key,value)
         #now clear the buffer: 
         node.buffer = []
 
