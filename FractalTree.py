@@ -196,7 +196,6 @@ class FractalTree(object):
         for i, item in enumerate(child.keys):
             if key == item:
                 return child.values[i]
-
         return None
 
     def calling_ra(self):
@@ -207,10 +206,51 @@ class FractalTree(object):
         """Prints the keys at each level."""
         self.root.show()
 
+    def search_retrieval(self, key):
+        """
+        Searches for a key value in the tree along with its buffers
+
+        Return value: 
+        key, value pair"""
+
+        #store the root node
+        current_node = self.root
+        #recursively traverse until a leaf is reached
+        while(current_node.leaf == False):
+            #traverse on the keys of the non-leaf node to find next child
+            temp2 = current_node.keys
+
+            ##search buffer first: 
+            for i, val in enumerate(current_node.buffer):
+                if (val[0]==key):
+                    return val[0], val[1]
+            
+            ##now search the node
+            for i in range(len(temp2)):
+                if (key == temp2[i]):
+                    #if the key is found, traverse to its right child 
+                    current_node = current_node.values[i + 1]
+                    break
+                elif (key < temp2[i]):
+                    #if key is less than the node.key, goto left child 
+                    current_node = current_node.values[i]
+                    break
+                elif (i + 1 == len(current_node.keys)):
+                    #if key is not found and end of node reached, goto right child 
+                    current_node = current_node.values[i + 1]
+                    break
+
+        ## search the key in leaf node: 
+        for i, item in enumerate(current_node.keys):
+            if item == key:
+                return key, current_node.values[i]
+
+
+
 
     def buffer(self,message):
         """Buffers an incoming message of insert/delete to Tree.""" 
-        
+
         # add the message to the root node
         output = self.root.add_to_buffer(message)
 
@@ -241,7 +281,7 @@ class FractalTree(object):
         for msg in node.buffer:
 
             #else check which child the message should traverse down to
-            key, value = msg[0], msg[1]
+            key, value, command = msg[0], msg[1], msg[2]
 
 
             child,indx = self._find(node,key)
@@ -276,12 +316,12 @@ class FractalTree(object):
         """Applies the insert/delete message on the -> node"""
         for msg in node.buffer:
 
-            command = "insert" #hardcoding command for now
+            # command = "insert" #hardcoding command for now
             
-            if command =="insert":
-                key, value = msg[0], msg[1]
-                ## insertion code goes here
-                self.insert(node.parent,node, key, value)
+            # if command =="insert":
+            key, value, command = msg[0], msg[1], msg[2] 
+            ## insertion code goes here
+            self.insert(node.parent,node, key, value)
         
         #now clear the buffer: 
         node.buffer = []
