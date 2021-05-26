@@ -79,18 +79,29 @@ class Node(object):
         right = Node(self.order)
         mid = self.order // 2
 
-        left.parent = self
-        left.keys = self.keys[:mid]
-        left.values = self.values[:mid]
+        left.parent = self 
+        left.keys = self.keys[:mid] 
+        left.values = self.values[:mid] 
 
-        right.parent = self
-        right.keys = self.keys[mid:]
-        right.values = self.values[mid:]
+        right.parent = self 
+        right.keys = self.keys[mid:] 
+        right.values = self.values[mid:] 
 
         # When the node is split, set the parent key to the left-most key of the right child node.
         self.keys = [right.keys[0]]
         self.values = [left, right]
         self.leaf = False
+
+        #now split the buffer if the node is not leaf: 
+        if not self.leaf: 
+            for msg in self.buffer:
+                if msg[0] < self.keys[0]:
+                    left.buffer.append(msg)
+                else:
+                    right.buffer.append(msg)
+
+            
+
     
 
     def is_full(self):
@@ -140,14 +151,22 @@ class FractalTree(object):
 
         return node.values[i + 1], i + 1
 
-    def _merge(self, parent, child, index):
+    def _merge(self, parent:Node, child:Node, index):
         """For a parent and child node, extract a pivot from the child to be inserted into the keys
         of the parent. Insert the values from the child into the values of the parent.
         """
+        #remove the child pointer in parent that points towards the internal node
         parent.values.pop(index)
+
+        #Now the parent of left and right is parent:Node.         
+        child.values[0].parent = parent
+        child.values[1].parent= parent
+
+        #extract the pivot key from the internal node
         pivot = child.keys[0]
 
         for i, item in enumerate(parent.keys):
+            #add the key to the parent node
             if pivot < item:
                 parent.keys = parent.keys[:i] + [pivot] + parent.keys[i:]
                 parent.values = parent.values[:i] + child.values + parent.values[i:]
@@ -157,6 +176,29 @@ class FractalTree(object):
                 parent.keys += [pivot]
                 parent.values += child.values
                 break
+        
+        #now check if parent is full, if yes then split parent 
+        if (parent.is_full()):
+            parent.split()
+            # extract the Grand parent node and make it the parent. Similarly, make
+            # the child a parent node. 
+            child = parent
+            parent = child.parent
+
+            # Once a node is split, it consists of a internal node and child nodes. These
+            # need to be re-inserted back into the tree.
+            if parent:
+                #find out the index at which leaf_node is stored in parent 
+                for indx, lf in enumerate(parent.values):
+                    if lf == child:
+                        index = indx
+                        break 
+                #merge the parent and leaf node 
+                self._merge(parent, child, index)
+
+
+
+
 
     def insert(self, parent_node: Node, leaf_node: Node, key, value):
         """Inserts a key-value pair to a leaf node. If the leaf node is full, split
@@ -179,7 +221,7 @@ class FractalTree(object):
 
             # Once a leaf node is split, it consists of a internal node and two leaf nodes. These
             # need to be re-inserted back into the tree.
-            if parent_node and not parent_node.is_full():
+            if parent_node:
                 #find out the index at which leaf_node is stored in parent 
                 child, index = self._find(leaf_node, key)
                 #merge the parent and leaf node 

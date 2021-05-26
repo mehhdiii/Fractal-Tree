@@ -1,7 +1,7 @@
 import random
 from FractalTree import FractalTree
 
-bplustree = FractalTree(order=8)
+bplustree = FractalTree(order=4)
 # for i in range(1000000):
 #     x = random.randint(1, 1000)
 #     bplustree.buffer((x, str(i)))
