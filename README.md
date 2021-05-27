@@ -165,7 +165,7 @@ The following steps must be followed to utilize the tree for creating an index:
 
 To create a tree object, use the following syntax: 
 
-```
+```python
 tree = FractalTree(order)
 ```
 
@@ -177,7 +177,7 @@ To insert data in the tree, a key, value pair must be passed to the `FractalTree
 
 Once data is in a (key, value) pair, use the following syntax for insertion: 
 
-```
+```python
 message = (key, value, "insert")
 tree.buffer(message)
 ```
