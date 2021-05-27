@@ -1,6 +1,7 @@
 # Fractal Tree 
 
 Fractal Tree Index implementation in Python. 
+Team: Fibonacci Additions
 
 ## Description
 
