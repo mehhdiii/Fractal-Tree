@@ -1,9 +1,66 @@
 # Fractal Tree 
 
-Fractal Tree Index implementation in Python. 
-Team: Fibonacci Additions
+This repository contains Fractal Tree Index implemented in Python. 
 
-## Description
+
+# How To Use Our implementation
+
+The implementation is stored on FractalTree.py file. The Data is stored as python List, enabling the tree to be compatible across data types. 
+The following steps must be followed to utilize the tree for creating an index: 
+
+#### Create a Tree object: 
+
+To create a tree object, use the following syntax: 
+
+```python
+tree = FractalTree(order)
+```
+
+where `order` is the order of Nodes in the tree.
+
+#### Insert Data in the tree:
+
+To insert data in the tree, a key, value pair must be passed to the `FractalTree.buffer()` method. If the data is not in a (key, value) format, use the python builtin `Hash` Method to generate a key for your data point. 
+
+Once data is in a (key, value) pair, use the following syntax for insertion: 
+
+```python
+message = (key, value, "insert")
+tree.buffer(message)
+```
+
+#### Retrieve Data from the Tree:
+
+To retrieve stored data from the tree, call the `FractalTree.search_retrieval` Method. The method can be called as follows: 
+
+```python
+tree.search_retrieval(key)
+```
+
+#### Delete Data from Tree:
+
+Deletion follows a similar syntax to insertion. There are two methods to delete from the tree.
+
+##### Method 1: 
+
+Call the `FractalTree.delete` Method directly: 
+
+```python
+tree.delete(key)
+```
+
+##### Method 2 (Beta):
+
+Push a delete message to the tree using the `FractalTree.buffer` Method: 
+
+```python
+message = (key, "delete")
+tree.buffer(message)
+```
+
+
+
+# Documentation
 
 This repository contains an implementation of Fractal Tree Index. These indexes are built up on B+ Trees and provide faster insertion speeds. The following two classes are the principle components of the implementation: 
 
@@ -150,65 +207,11 @@ search and find the leaf node where the value may exists
 **Return Type:** `None` 
 
 
-
 ## Dependencies
 
 This project was built on Python 3.9.0 64-bit. No external dependences and libraries used.  
 
+### Dev team 
+This project was made for Data Structures II Spring 2021 Offering at Habib University by team Fibonnaci Additions. 
 
-
-# How To Use Our implementation
-
-The implementation is stored on FractalTree.py file. The Data is stored as python List, enabling the tree to be compatible across data types. 
-The following steps must be followed to utilize the tree for creating an index: 
-
-#### Create a Tree object: 
-
-To create a tree object, use the following syntax: 
-
-```python
-tree = FractalTree(order)
-```
-
-where `order` is the order of Nodes in the tree.
-
-#### Insert Data in the tree:
-
-To insert data in the tree, a key, value pair must be passed to the `FractalTree.buffer()` method. If the data is not in a (key, value) format, use the python builtin `Hash` Method to generate a key for your data point. 
-
-Once data is in a (key, value) pair, use the following syntax for insertion: 
-
-```python
-message = (key, value, "insert")
-tree.buffer(message)
-```
-
-#### Retrieve Data from the Tree:
-
-To retrieve stored data from the tree, call the `FractalTree.search_retrieval` Method. The method can be called as follows: 
-
-```python
-tree.search_retrieval(key)
-```
-
-#### Delete Data from Tree:
-
-Deletion follows a similar syntax to insertion. There are two methods to delete from the tree.
-
-##### Method 1: 
-
-Call the `FractalTree.delete` Method directly: 
-
-```python
-tree.delete(key)
-```
-
-##### Method 2 (Beta):
-
-Push a delete message to the tree using the `FractalTree.buffer` Method: 
-
-```
-message = (key, "delete")
-tree.buffer(message)
-```
 
